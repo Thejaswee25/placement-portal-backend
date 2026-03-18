@@ -33,14 +33,12 @@ public class SecurityConfig {
     private JwtAuthEntryPoint jwtAuthEntryPoint;
 
     // ---- Password Encoder ----
-
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     // ---- Authentication Provider ----
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -50,24 +48,28 @@ public class SecurityConfig {
     }
 
     // ---- Authentication Manager ----
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
     // ---- Security Filter Chain ----
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // ✅ ENABLE CORS (THIS WAS MISSING)
+            .cors(cors -> {})
+
             .csrf(AbstractHttpConfigurer::disable)
+
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthEntryPoint)
             )
+
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/auth/**").permitAll()
@@ -83,7 +85,9 @@ public class SecurityConfig {
                 // All other requests must be authenticated
                 .anyRequest().authenticated()
             )
+
             .authenticationProvider(authenticationProvider())
+
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
