@@ -1,12 +1,11 @@
 package com.placementportal.controller;
 
-import com.placementportal.dto.ApplicationDTO;
-import com.placementportal.dto.CompanyDTO;
-import com.placementportal.dto.StudentProfileDTO;
+import com.placementportal.dto.*;
 import com.placementportal.entity.Interview;
 import com.placementportal.service.CompanyService;
 import com.placementportal.service.StudentService;
 import com.placementportal.util.FileUploadUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,24 +30,26 @@ public class StudentController {
     @Autowired
     private FileUploadUtil fileUploadUtil;
 
-    // GET /api/student/profile
+    // GET PROFILE
     @GetMapping("/profile")
     public ResponseEntity<StudentProfileDTO> getProfile(
             @AuthenticationPrincipal UserDetails userDetails) {
-        StudentProfileDTO profile = studentService.getProfile(userDetails.getUsername());
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(
+                studentService.getProfile(userDetails.getUsername())
+        );
     }
 
-    // PUT /api/student/profile
+    // UPDATE PROFILE
     @PutMapping("/profile")
     public ResponseEntity<StudentProfileDTO> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody StudentProfileDTO dto) {
-        StudentProfileDTO updated = studentService.saveProfile(userDetails.getUsername(), dto);
-        return ResponseEntity.ok(updated);
+        return ResponseEntity.ok(
+                studentService.saveProfile(userDetails.getUsername(), dto)
+        );
     }
 
-    // POST /api/student/upload-resume
+    // UPLOAD RESUME
     @PostMapping("/upload-resume")
     public ResponseEntity<Map<String, String>> uploadResume(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -56,13 +57,12 @@ public class StudentController {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Please select a file to upload"));
+                    .body(Map.of("error", "Please select a file"));
         }
 
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.equals("application/pdf")) {
+        if (!"application/pdf".equals(file.getContentType())) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Only PDF files are allowed"));
+                    .body(Map.of("error", "Only PDF allowed"));
         }
 
         String fileName = fileUploadUtil.saveFile(file, userDetails.getUsername());
@@ -72,40 +72,42 @@ public class StudentController {
         studentService.updateResumeUrl(userDetails.getUsername(), fileUrl);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Resume uploaded successfully",
+                "message", "Upload success",
                 "resumeUrl", fileUrl
         ));
     }
 
-    // GET /api/student/jobs
+    // JOBS
     @GetMapping("/jobs")
     public ResponseEntity<List<CompanyDTO>> getJobs() {
-        List<CompanyDTO> companies = companyService.getAllCompanies();
-        return ResponseEntity.ok(companies);
+        return ResponseEntity.ok(companyService.getAllCompanies());
     }
 
-    // POST /api/student/apply/{jobId}
+    // APPLY
     @PostMapping("/apply/{jobId}")
     public ResponseEntity<ApplicationDTO> applyToJob(
             @AuthenticationPrincipal UserDetails userDetails,
             @PathVariable Long jobId) {
-        ApplicationDTO application = studentService.applyToCompany(userDetails.getUsername(), jobId);
-        return ResponseEntity.ok(application);
+        return ResponseEntity.ok(
+                studentService.applyToCompany(userDetails.getUsername(), jobId)
+        );
     }
 
-    // GET /api/student/applications
+    // APPLICATIONS
     @GetMapping("/applications")
     public ResponseEntity<List<ApplicationDTO>> getMyApplications(
             @AuthenticationPrincipal UserDetails userDetails) {
-        List<ApplicationDTO> applications = studentService.getMyApplications(userDetails.getUsername());
-        return ResponseEntity.ok(applications);
+        return ResponseEntity.ok(
+                studentService.getMyApplications(userDetails.getUsername())
+        );
     }
 
-    // GET /api/student/interviews
+    // INTERVIEWS
     @GetMapping("/interviews")
     public ResponseEntity<List<Interview>> getMyInterviews(
             @AuthenticationPrincipal UserDetails userDetails) {
-        List<Interview> interviews = studentService.getMyInterviews(userDetails.getUsername());
-        return ResponseEntity.ok(interviews);
+        return ResponseEntity.ok(
+                studentService.getMyInterviews(userDetails.getUsername())
+        );
     }
 }
