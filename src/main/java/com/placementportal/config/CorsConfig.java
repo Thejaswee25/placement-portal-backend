@@ -2,11 +2,9 @@ package com.placementportal.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 import org.springframework.web.filter.CorsFilter;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -16,24 +14,27 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow React frontend (adjust origin if needed)
+        // ✅ Allow frontend domains (local + deployed)
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://placement-portal-frontend-dcnn.onrender.com"
         ));
 
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-        config.setAllowedHeaders(Arrays.asList(
-                "Authorization",
-                "Content-Type",
-                "Accept",
-                "Origin",
-                "X-Requested-With"
+        // ✅ Allow all common methods
+        config.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"
         ));
 
-        config.setExposedHeaders(List.of("Authorization"));
+        // ✅ Allow all headers (simpler + safer for now)
+        config.setAllowedHeaders(List.of("*"));
+
+        // ✅ Allow credentials (JWT, cookies if needed)
         config.setAllowCredentials(true);
+
+        // ✅ Expose Authorization header
+        config.setExposedHeaders(List.of("Authorization"));
+
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
