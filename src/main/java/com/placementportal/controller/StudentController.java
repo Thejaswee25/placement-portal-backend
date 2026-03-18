@@ -66,7 +66,8 @@ public class StudentController {
         }
 
         String fileName = fileUploadUtil.saveFile(file, userDetails.getUsername());
-        String fileUrl = "/uploads/resumes/" + fileName;
+
+        String fileUrl = "https://placement-portal-backend-cjgw.onrender.com/uploads/resumes/" + fileName;
 
         studentService.updateResumeUrl(userDetails.getUsername(), fileUrl);
 
